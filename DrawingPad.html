@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG Logo Drawer</title>
+    
+</head>
+    <link rel="stylesheet" href="DrawingPadStyleSheet.css">
+<body>
+
+<div class="controls"> 
+    <button class="save-btn" onclick="saveDrawing()">Save Current Logo</button>
+    <button onclick="prevLogo()">⬅ Previous Saved</button>
+    <button onclick="nextLogo()">➡ Next Saved</button>
+    <button onclick="clearCanvas()">Clear Canvas</button>
+</div>
+
+<div class="color-palette">
+    <div class="color" style="background:#000000" onclick="setColor('#000000')"></div>
+    <div class="color" style="background:#ef4444" onclick="setColor('#ef4444')"></div>
+    <div class="color" style="background:#22c55e" onclick="setColor('#22c55e')"></div>
+    <div class="color" style="background:#3b82f6" onclick="setColor('#3b82f6')"></div>
+    <div class="color" style="background:#eab308" onclick="setColor('#eab308')"></div>
+    <div class="color" style="background:#a855f7" onclick="setColor('#a855f7')"></div>
+</div>
+
+<svg id="logo-canvas" width="400" height="200" style="border:2px solid #333; background: white;"></svg>
+
+<div class="info">
+    <p><strong>Current Drawing ID:</strong> <span id="historyIndexDisplay">None</span></p>
+    <p><strong>Total Saved Logos:</strong> <span id="count">0</span></p>
+</div>
+
+<script>
+    const svg = document.getElementById('logo-canvas');
+    let isDrawing = false;
+    let currentPath = null;
+
+    let strokeHistory = []; 
+
+    let savedLogos = []; 
+    let logoIndex = -1;
+
+    let currentColor = "black";
+
+    function setColor(color)
+    {
+    currentColor = color;
+    }
+
+    svg.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        currentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+        currentPath.setAttribute("stroke", currentColor);
+        currentPath.setAttribute("stroke-width", "5");
+        currentPath.setAttribute("fill", "none");
+        currentPath.setAttribute("stroke-linejoin", "round");
+        currentPath.setAttribute("stroke-linecap", "round");
+
+        const rect = svg.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        currentPath.setAttribute("d", `M ${x} ${y}`);
+
+        svg.appendChild(currentPath);
+    });
+
+    svg.addEventListener('mousemove', (e) => {    
+        if (!isDrawing) return;
+        const rect = svg.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        let d = currentPath.getAttribute("d");
+        currentPath.setAttribute("d", `${d} L ${x} ${y}`);
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDrawing) {
+            isDrawing = false;
+            // Record the stroke internally
+            strokeHistory.push(svg.innerHTML);
+        }
+    });
+    function saveDrawing() {
+        // Take a snapshot of the current SVG content
+        savedLogos.push(svg.innerHTML);
+        logoIndex = savedLogos.length - 1;
+        updateUI();
+    }
+
+    function prevLogo() {
+        if (logoIndex > 0) {
+            logoIndex--;
+            svg.innerHTML = savedLogos[logoIndex];
+            updateUI();
+        } else if (logoIndex === 0) {
+            logoIndex = -1;
+            svg.innerHTML = '';
+            updateUI();
+        } else {
+            alert("No previous saved logos!");
+        }
+    }
+
+    function nextLogo() {
+        if (logoIndex < savedLogos.length - 1) {
+            logoIndex++;
+            svg.innerHTML = savedLogos[logoIndex];
+            updateUI();
+        }
+    }
+
+    function clearCanvas() {
+        svg.innerHTML = '';
+        strokeHistory = []; // Reset canvas
+    }
+
+    function updateUI() {
+        const countSpan = document.getElementById('count');
+        const indexSpan = document.getElementById('historyIndexDisplay');
+
+        countSpan.innerText = savedLogos.length;
+        indexSpan.innerText = (logoIndex === -1) ? "None" : logoIndex;
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'z') {
+            if (strokeHistory.length > 0) {
+                strokeHistory.pop(); // Remove last stroke
+                svg.innerHTML = strokeHistory.length > 0 ? strokeHistory[strokeHistory.length - 1] : '';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

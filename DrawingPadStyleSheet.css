@@ -1,0 +1,80 @@
+﻿<style>
+
+body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:30px;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:8px;
+    background:#1e293b;
+    color:#e2e8f0;
+    cursor:pointer;
+    font-size:14px;
+    transition: all .15s ease;
+}
+
+.save-btn{
+    background:#38bdf8;
+    color:white;
+}
+
+.save-btn:hover{
+    background:#0ea5e9;
+}
+
+button:hover{
+    background:#334155;
+    transform:translateY(-1px);
+}
+
+button:active{
+    transform:translateY(0px);
+}
+
+#logo-canvas{
+    border-radius:12px;
+    border:2px solid #334155;
+    background:white;
+    box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.info{
+    margin-top:15px;
+    text-align:center;
+    color:#94a3b8;
+}
+
+.color-palette{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+}
+
+.color{
+    width:26px;
+    height:26px;
+    border-radius:6px;
+    cursor:pointer;
+    border:2px solid #1e293b;
+}
+
+.color:hover{
+    transform:scale(1.1);
+}
+
+</style>
