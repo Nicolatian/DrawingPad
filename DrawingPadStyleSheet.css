@@ -1,80 +1,238 @@
 ﻿<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-body{
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:30px;
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 18px 48px;
+  gap: 14px;
 }
 
-.controls{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-    flex-wrap:wrap;
+/* Header */
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  align-self: flex-start;
+  width: 100%;
+  max-width: 1260px;
+}
+header h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  background: linear-gradient(130deg, #38bdf8, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+header span {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: #64748b;
 }
 
-button{
-    padding:8px 16px;
-    border:none;
-    border-radius:8px;
-    background:#1e293b;
-    color:#e2e8f0;
-    cursor:pointer;
-    font-size:14px;
-    transition: all .15s ease;
+/* Layout */
+.workspace {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1260px;
 }
 
-.save-btn{
-    background:#38bdf8;
-    color:white;
+/* Toolbars */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 10px 8px;
+  min-width: 62px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tb-divider {
+  width: 75%;
+  height: 1px;
+  background: #334155;
+  margin: 3px 0;
+}
+.tb-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.52rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
-.save-btn:hover{
-    background:#0ea5e9;
+.tool-btn {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #162032;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.14s ease;
+  position: relative;
+}
+.tool-btn:hover { background: #334155; color: #e2e8f0; transform: translateY(-1px); }
+.tool-btn:active { transform: translateY(0); }
+
+
+.tool-btn.active {
+  outline: 2px solid #e2e8f0;
+  background: #162032;
+  filter: brightness(1.2);
+},
+.tool-btn[data-tool].active {
+  background: #162032 !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: none !important;
 }
 
-button:hover{
-    background:#334155;
-    transform:translateY(-1px);
+/* Tooltip */
+.tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 0.68rem;
+  font-family: 'Space Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 200;
+}
+.tool-btn:hover .tip { opacity: 1; }
+
+/* Canvas area */
+.canvas-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
-button:active{
-    transform:translateY(0px);
+#logo-canvas {
+  display: block;
+  background: #ffffff;
 }
 
-#logo-canvas{
-    border-radius:12px;
-    border:2px solid #334155;
-    background:white;
-    box-shadow:0 10px 25px rgba(0,0,0,.4);
+/* Right panel */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 280px;
+  max-width: 320px;
+}
+.panel-card {
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.panel-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
-.info{
-    margin-top:15px;
-    text-align:center;
-    color:#94a3b8;
+/* Color palette */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 32px); 
+  gap: 8px;
+  width: 100%;
+  justify-content: start;
+}
+.color-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.color-swatch:hover { transform: scale(1.14); }
+.color-swatch.selected { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#customColorPicker {
+  width: 36px; height: 36px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 2px;
+  cursor: pointer;
+  background: #162032;
+  flex-shrink: 0;
+}
+#currentColorDisplay {
+  flex: 1; height: 36px;
+  border-radius: 6px;
+  border: 1px solid #334155;
 }
 
-.color-palette{
-    margin-top:10px;
-    display:flex;
-    gap:8px;
+/* Buttons */
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #162032;
+  color: #e2e8f0;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: all .15s ease;
 }
+button:hover { background: #334155; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
 
-.color{
-    width:26px;
-    height:26px;
-    border-radius:6px;
-    cursor:pointer;
-    border:2px solid #1e293b;
-}
+.btn-full { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-save { background: #38bdf8; color: #0f172a; font-weight: 600; }
+.btn-save:hover { background: #0ea5e9 !important; color: #fff; }
+.btn-danger:hover { background: #f87171 !important; color: #fff; }
+.btn-undo:hover { background: #a78bfa !important; color: #fff; }
+.btn-export:hover { background: #34d399 !important; color: #0f172a; }
 
-.color:hover{
-    transform:scale(1.1);
+/* Info rows */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-family: 'Space Mono', monospace;
 }
+.info-row span:last-child { color: #34d399; }
 
 </style>

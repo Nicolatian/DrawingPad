@@ -1,138 +1,123 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>SVG Logo Drawer</title>
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrawPad Studio</title>
+  <link rel="stylesheet" href="DrawingPadStyleSheet.css">
 </head>
-    <link rel="stylesheet" href="DrawingPadStyleSheet.css">
+
+
 <body>
-
-<div class="controls"> 
-    <button class="save-btn" onclick="saveDrawing()">Save Current Logo</button>
-    <button onclick="prevLogo()">⬅ Previous Saved</button>
-    <button onclick="nextLogo()">➡ Next Saved</button>
-    <button onclick="clearCanvas()">Clear Canvas</button>
+<header>
+  <h1>DrawPad Studio</h1>
+  
+</header>
+ 
+<div class="workspace">
+  <!--  TOOLBAR -->
+  <div class="toolbar">
+    <span class="tb-label">Draw</span>
+    <button class="tool-btn active" data-tool="pen">
+      ✏️<span class="tip">Pen  [P]</span>
+    </button>
+    <button class="tool-btn" data-tool="eraser">
+      🧹<span class="tip">Eraser  [E]</span>
+    </button>
+    <div class="tb-divider"></div>
+    <span class="tb-label">Shape</span>
+    <button class="tool-btn" data-tool="line">
+      ╱<span class="tip">Line  [L]</span>
+    </button>
+    <button class="tool-btn" data-tool="rect">
+      ▭<span class="tip">Rectangle  [R]</span>
+    </button>
+    <button class="tool-btn" data-tool="circle">
+      ◯<span class="tip">Ellipse  [C]</span>
+    </button>
+    <div class="tb-divider"></div>
+    <span class="tb-label">Color</span>
+    <button class="tool-btn" data-tool="fill">
+      🪣<span class="tip">Fill  [F]</span>
+    </button>
+    <button class="tool-btn" data-tool="eyedrop">
+      💉<span class="tip">Eyedropper  [I]</span>
+    </button>
+  </div>
+ 
+  <!-- CANVAS -->
+  <div class="canvas-wrap">
+    <div class="canvas-scroll" id="canvasScroll">
+      <canvas id="logo-canvas" width="870" height="690"></canvas>
+    </div>
+ 
+    <!-- Thumbnail strip -->
+    <div class="panel-card" style="padding:10px 12px;">
+      <div class="panel-title">Saved Logos</div>
+      <div class="thumb-strip" id="thumbStrip">
+        <span style="font-size:0.72rem;color:var(--text-dim);align-self:center;">No saves yet</span>
+      </div>
+      <div class="info-row">
+        <span>Current</span><span id="historyIndexDisplay">—</span>
+        <span style="margin-left:14px;">Total</span><span id="count">0</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+ 
+    <!-- Colors -->
+    <div class="panel-card">
+      <div class="panel-title">Color</div>
+      <div class="color-grid" id="swatchGrid"></div>
+      <div class="custom-row">
+        <input type="color" id="customColorPicker" value="#000000" title="Custom colour">
+        <div id="currentColorDisplay" style="background:#000000;"></div>
+      </div>
+    </div>
+ 
+    <!-- Brush -->
+    <div class="panel-card">
+      <div class="panel-title">Brush</div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <label>Size</label>
+          <input type="range" id="brushSize" min="1" max="100" value="5">
+          <span class="sv" id="brushSizeVal">5</span>
+        </div>
+        <div class="slider-row">
+          <label>Opacity</label>
+          <input type="range" id="brushOpacity" min="0.05" max="1" step="0.01" value="1">
+          <span class="sv" id="brushOpacityVal">100%</span>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Actions -->
+    <div class="panel-card">
+      <div class="panel-title">Actions</div>
+      <button class="btn-full btn-save" onclick="saveDrawing()">Save Logo</button>
+      <div class="nav-row">
+        <button onclick="prevLogo()" title="Previous [←]">⬅</button>
+        <button onclick="nextLogo()" title="Next [→]">➡</button>
+        <button class="btn-undo" onclick="undo()" title="Undo [Ctrl+Z]">↩</button>
+      </div>
+      <button class="btn-full btn-export" onclick="exportPNG()">Export PNG</button>
+      <button class="btn-full btn-danger" onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+ 
+    <!-- Info -->
+    <div class="panel-card">
+      <div class="panel-title">Info</div>
+      <div class="info-row"><span>Canvas</span><span>1000×1000</span></div>
+      <div class="info-row"><span>Tool</span><span id="activeTool">pen</span></div>
+      <div class="info-row"><span>Pos</span><span id="cursorPos">—</span></div>
+    </div>
+ 
+  </div>
 </div>
-
-<div class="color-palette">
-    <div class="color" style="background:#000000" onclick="setColor('#000000')"></div>
-    <div class="color" style="background:#ef4444" onclick="setColor('#ef4444')"></div>
-    <div class="color" style="background:#22c55e" onclick="setColor('#22c55e')"></div>
-    <div class="color" style="background:#3b82f6" onclick="setColor('#3b82f6')"></div>
-    <div class="color" style="background:#eab308" onclick="setColor('#eab308')"></div>
-    <div class="color" style="background:#a855f7" onclick="setColor('#a855f7')"></div>
-</div>
-
-<svg id="logo-canvas" width="400" height="200" style="border:2px solid #333; background: white;"></svg>
-
-<div class="info">
-    <p><strong>Current Drawing ID:</strong> <span id="historyIndexDisplay">None</span></p>
-    <p><strong>Total Saved Logos:</strong> <span id="count">0</span></p>
-</div>
-
-<script>
-    const svg = document.getElementById('logo-canvas');
-    let isDrawing = false;
-    let currentPath = null;
-
-    let strokeHistory = []; 
-
-    let savedLogos = []; 
-    let logoIndex = -1;
-
-    let currentColor = "black";
-
-    function setColor(color)
-    {
-    currentColor = color;
-    }
-
-    svg.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        currentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-        currentPath.setAttribute("stroke", currentColor);
-        currentPath.setAttribute("stroke-width", "5");
-        currentPath.setAttribute("fill", "none");
-        currentPath.setAttribute("stroke-linejoin", "round");
-        currentPath.setAttribute("stroke-linecap", "round");
-
-        const rect = svg.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-        currentPath.setAttribute("d", `M ${x} ${y}`);
-
-        svg.appendChild(currentPath);
-    });
-
-    svg.addEventListener('mousemove', (e) => {    
-        if (!isDrawing) return;
-        const rect = svg.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-
-        let d = currentPath.getAttribute("d");
-        currentPath.setAttribute("d", `${d} L ${x} ${y}`);
-    });
-
-    window.addEventListener('mouseup', () => {
-        if (isDrawing) {
-            isDrawing = false;
-            // Record the stroke internally
-            strokeHistory.push(svg.innerHTML);
-        }
-    });
-    function saveDrawing() {
-        // Take a snapshot of the current SVG content
-        savedLogos.push(svg.innerHTML);
-        logoIndex = savedLogos.length - 1;
-        updateUI();
-    }
-
-    function prevLogo() {
-        if (logoIndex > 0) {
-            logoIndex--;
-            svg.innerHTML = savedLogos[logoIndex];
-            updateUI();
-        } else if (logoIndex === 0) {
-            logoIndex = -1;
-            svg.innerHTML = '';
-            updateUI();
-        } else {
-            alert("No previous saved logos!");
-        }
-    }
-
-    function nextLogo() {
-        if (logoIndex < savedLogos.length - 1) {
-            logoIndex++;
-            svg.innerHTML = savedLogos[logoIndex];
-            updateUI();
-        }
-    }
-
-    function clearCanvas() {
-        svg.innerHTML = '';
-        strokeHistory = []; // Reset canvas
-    }
-
-    function updateUI() {
-        const countSpan = document.getElementById('count');
-        const indexSpan = document.getElementById('historyIndexDisplay');
-
-        countSpan.innerText = savedLogos.length;
-        indexSpan.innerText = (logoIndex === -1) ? "None" : logoIndex;
-    }
-
-    window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'z') {
-            if (strokeHistory.length > 0) {
-                strokeHistory.pop(); // Remove last stroke
-                svg.innerHTML = strokeHistory.length > 0 ? strokeHistory[strokeHistory.length - 1] : '';
-            }
-        }
-    });
-</script>
-
+ <script src="DrawingPad.js"></script>
 </body>
 </html>
